@@ -1,49 +1,3 @@
---[[
-	ModMenu Lib DOCS
-	
-	Settings
-		> Theme
-			> Main: COLOR3, defaults Color3.fromRGB(165, 96, 97)
-			> Background: COLOR3, defaults Color3.fromRGB(0, 0, 0)
-			> TextColor: COLOR3, defaults Color3.fromRGB(255, 255, 255)
-		> WindowCount: Amount of windows
-		> Draggable: BOOLEAN, whether the windows can be dragged or not
-		> Keybind: Enum.KeyCode, used to toggle UI
-	
-	CreateMenu [params 1; settings]
-		> Menu: ScreenGui
-		> MenuSettings: Current settings for menu, refer to [Settings]
-		> MenuOptions
-			> CreateWindow [params 1, name]: Creates a new window, returns [Create Menu > MenuOptions > CreateWindow > WindowOptions]
-				> WindowOptions
-					> Toggles [table]: Currently enabled toggleables
-					> Add [params 2, type, name]: Creates a new child under window, returns [Create Menu > MenuOptions > CreateWindow > WindowOptions > Add > ButtonOptions]
-						> Name: Name of button
-						> Style: Current style of button [toggleable, clickable]
-						> Callback: Function called when button is clicked or toggled
-	
-	Callbacks [custom params]
-		-> Default callback
-				function(Type, Name, a)
-					if Type == 'toggle' then
-						print(Name..' is now toggled to; '..tostring(a))
-					elseif Type == 'clickable' then
-						print(Name..' was clicked')
-					end
-				end
-		> Callbacks can be modified via [Create Menu > MenuOptions > CreateWindow > WindowOptions > Add > ButtonOptions > Callback]
-	
-	
-	Contact Information
-		> [DISCORD] Josh#0903
-		
-	To Note:
-		> Draggable is buggy, don't ask me to fix that -> Do it yourself if you need a working one
-		
-	Example Script:
-		> https://hastebin.com/jakibotohi.lua
---]]
-
 local ModMenu = {}
 local ModMenuDefaultSettings = {
 	['Theme'] = {
@@ -54,7 +8,7 @@ local ModMenuDefaultSettings = {
 	['WindowCount'] = -1,
 	['Draggable'] = true,
 	['Keybind'] = Enum.KeyCode.F2
-} -- Settings for UIs without [param [Settings]]
+}
 
 ModMenu.CreateMenu = function(Settings)
 	if game:GetService'CoreGui':FindFirstChild'ModMenu' then
@@ -88,6 +42,7 @@ ModMenu.CreateMenu = function(Settings)
 	local GlobalEmuKeyBindModules = {}
     local AllowDrag = {}
     local EnableBlur = true
+    local EnableHideUI = false
 	MenuOptions.CreateWindow = function(Name)
 		if not Menu:FindFirstChild'Windows' then
 			local Windows = Instance.new'Frame'
@@ -517,7 +472,7 @@ ModMenu.CreateMenu = function(Settings)
 					V.Draggable = Enabled
 				end
 				local StarterGui = game:GetService('StarterGui')
-				if Enabled then
+				if Enabled and EnableHideUI then
 					StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.All, false)
 				else
 					StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.All, true)
@@ -571,6 +526,16 @@ ModMenu.CreateMenu = function(Settings)
 		EnableBlur = Value
 		BlurEffect.Enabled = EnableBlur
     end
+
+    function SetHideUI(Value)
+        EnableHideUI = Value
+        local StarterGui = game:GetService('StarterGui')
+        if Enabled and EnableHideUI then
+            StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.All, false)
+        else
+            StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.All, true)
+        end
+    end
 	
 	return {
 		['Menu'] = Menu, 
@@ -582,7 +547,8 @@ ModMenu.CreateMenu = function(Settings)
 		['GetActive'] = GetActive,
 		['EmulateToggle'] = EmuToggle,
         ['EmulateKeyBind'] = EmuKeyBind,
-        ['SetBlur'] = SetBlur
+        ['SetBlur'] = SetBlur,
+        ['SetHideUI'] = SetHideUI
 	}
 end
 
